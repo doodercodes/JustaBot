@@ -1,23 +1,11 @@
-// Package things needed for the bot & commands.
-//const Discord = require('discord.js');
-//const client = new Discord.Client({partials: ['MESSAGE', 'CHANNEL', 'REACTION'], intents: [ Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Discord.Intents.FLAGS.GUILD_MEMBERS  ]});
-const {
-  Client,
-  GatewayIntentBits,
-  Partials,
-  ActivityType,
-} = require("discord.js");
-const client = new Client({
-  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessageReactions,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildPresences,
-  ],
-});
+// impports
+require("dotenv").config();
+const config = require("./config");
+
+const { Client, ActivityType } = require("discord.js");
+const { SlashCommandBuilder, Routes } = require("discord.js");
+const { REST } = require("@discordjs/rest");
+
 const ud = require("urban-dictionary");
 const mysql = require("mysql");
 const request = require("request");
@@ -25,18 +13,28 @@ const fs = require("fs");
 const http = require("http");
 const https = require("https");
 const math = require("mathjs");
+
+// create bot client with needed options
+const client = new Client({
+  partials: config.CLIENT.partials,
+  intents: config.CLIENT.intents,
+});
+
 const unixTime = Math.floor(Date.now() / 1000);
+
 // Create a connection to the mysql database
 function mysqlConnect() {
   var mysqlParams = mysql.createConnection({
-    host: "127.0.0.1",
-    user: "ur user here",
-    password: "ur password here",
-    database: "ur db here",
+    // host: "127.0.0.1",
+    // user: "ur user here",
+    // password: "ur password here",
+    // database: "ur db here",
   });
   return mysqlParams;
 }
+
 const objMysq = mysqlConnect();
+
 // Functions needed for commands.
 // Removes first word.
 function rmF(str) {
@@ -46,15 +44,13 @@ function rmF(str) {
   }
   return str.substring(indexOfSpace + 1);
 }
+
 // Sleep function, when you want the command to pause for a bit.
 function sleep(time, callback) {
   var stop = new Date().getTime();
   while (new Date().getTime() < stop + time) {}
   callback();
 }
-
-const { SlashCommandBuilder, Routes } = require("discord.js");
-const { REST } = require("@discordjs/rest");
 
 const commands = [
   new SlashCommandBuilder()
@@ -84,6 +80,7 @@ rest
   .then(() => console.log("Successfully registered application commands."))
   .catch(console.error);
 
+// !
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -96,6 +93,7 @@ client.on("interactionCreate", async (interaction) => {
     if (membersStatus === null || membersStatus === undefined) {
       var membersStatus = "offline";
     }
+
     // Determine if this chat is allowed to use the bot.
     var sql = "SELECT * FROM discord WHERE discord_id = ?";
     objMysq.query(sql, [senderID], function (err, rows, fields) {
@@ -109,8 +107,8 @@ client.on("interactionCreate", async (interaction) => {
         const aiEnabled = rows[0].ai_enabled;
         const aaDmin = rows[0].ai_admin;
         const myLastI = rows[0].last_search;
-        // Check whether or not the sender is banned from using JustaBot.
 
+        // Check whether or not the sender is banned from using JustaBot.
         if (commandName === "i") {
           if (myBanned === "yes") {
             //interaction.reply("im confused. it seems ur offline <:pepesmile:961516075135160330>");
@@ -133,6 +131,7 @@ client.on("interactionCreate", async (interaction) => {
             );
           }
         }
+
         if (commandName === "r") {
           if (myBanned === "yes") {
             //interaction.reply("im confused. it seems ur offline <:pepesmile:961516075135160330>");
@@ -169,6 +168,7 @@ client.on("ready", () => {
     status: "online",
   });
 });
+
 // Add role if reaction is added.
 client.on("messageReactionAdd", async (reaction, user) => {
   if (reaction.message.partial) await reaction.message.fetch();
@@ -323,6 +323,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
     member.roles.remove("1027215369468915712");
   }
 });
+
 client.on("messageCreate", (msg) => {
   //console.log(msg);
   const chatmsg = msg.content;
@@ -664,4 +665,5 @@ client.on("messageCreate", (msg) => {
     }
   })(); // erase this
 });
-client.login("ur discord key sht");
+
+client.login(config.BOT_TOKEN);
