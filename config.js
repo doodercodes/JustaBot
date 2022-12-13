@@ -3,7 +3,6 @@ const { GatewayIntentBits, Partials } = require("discord.js");
 module.exports = {
   // clientID: "1040504952793071616",
   // guildID: "1028718616553721896",
-  BOT_TOKEN: process.env.BOT_TOKEN,
   MYSQL: {
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
@@ -11,6 +10,7 @@ module.exports = {
     database: process.env.MYSQL_DB,
   },
   CLIENT: {
+    bot_token: process.env.BOT_TOKEN,
     intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,

@@ -666,4 +666,4 @@ client.on("messageCreate", (msg) => {
   })(); // erase this
 });
 
-client.login(config.BOT_TOKEN);
+client.login(config.CLIENT.bot_token);
