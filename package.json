@@ -1,0 +1,23 @@
+{
+  "name": "justabot",
+  "version": "1.1.0",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "discord.js": "^14.6.0",
+    "dotenv": "^16.0.3",
+    "mathjs": "^11.3.3",
+    "mysql": "^2.18.1",
+    "request": "^2.88.2",
+    "urban-dictionary": "^3.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
