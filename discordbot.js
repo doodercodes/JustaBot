@@ -69,20 +69,15 @@ const commands = [
     .setDescription("Performs your last /i search again"),
 ].map((command) => command.toJSON());
 
-// const rest = new REST({ version: "10" }).setToken("ur token here");
+const rest = new REST({ version: "10" }).setToken(config.CLIENT.bot_token);
 
-// rest
-//   .put(
-//     Routes.applicationGuildCommands(
-//       "ur server shit here ig",
-//       "ur server shit here ig"
-//     ),
-//     { body: commands }
-//   )
-//   .then(() => console.log("Successfully registered application commands."))
-//   .catch(console.error);
+rest
+  .put(Routes.applicationGuildCommands(config.clientID, config.guildID), {
+    body: commands,
+  })
+  .then(() => console.log("Successfully registered application commands."))
+  .catch(console.error);
 
-// !
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
