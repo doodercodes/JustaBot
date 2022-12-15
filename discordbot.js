@@ -2,10 +2,10 @@
 require("dotenv").config();
 const config = require("./config");
 
-const { Client, ActivityType } = require("discord.js");
-const { SlashCommandBuilder, Routes } = require("discord.js");
+const { Client, SlashCommandBuilder, Routes } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 
+require("colors");
 const ud = require("urban-dictionary");
 const mysql = require("mysql");
 const request = require("request");
@@ -20,17 +20,19 @@ const client = new Client({
   intents: config.CLIENT.intents,
 });
 
+client.on("ready", () => {
+  console.log(`Logged in as ${client.user.tag}!`.brightGreen.bold);
+  client.user.setPresence({
+    activities: config.CLIENT.activities,
+    status: config.CLIENT.status,
+  });
+});
+
 const unixTime = Math.floor(Date.now() / 1000);
 
 // Create a connection to the mysql database
 function mysqlConnect() {
-  var mysqlParams = mysql.createConnection({
-    // host: "127.0.0.1",
-    // user: "ur user here",
-    // password: "ur password here",
-    // database: "ur db here",
-  });
-  return mysqlParams;
+  return mysql.createConnection(config.MYSQL);
 }
 
 const objMysq = mysqlConnect();
@@ -67,18 +69,18 @@ const commands = [
     .setDescription("Performs your last /i search again"),
 ].map((command) => command.toJSON());
 
-const rest = new REST({ version: "10" }).setToken("ur token here");
+// const rest = new REST({ version: "10" }).setToken("ur token here");
 
-rest
-  .put(
-    Routes.applicationGuildCommands(
-      "ur server shit here ig",
-      "ur server shit here ig"
-    ),
-    { body: commands }
-  )
-  .then(() => console.log("Successfully registered application commands."))
-  .catch(console.error);
+// rest
+//   .put(
+//     Routes.applicationGuildCommands(
+//       "ur server shit here ig",
+//       "ur server shit here ig"
+//     ),
+//     { body: commands }
+//   )
+//   .then(() => console.log("Successfully registered application commands."))
+//   .catch(console.error);
 
 // !
 client.on("interactionCreate", async (interaction) => {
@@ -159,14 +161,6 @@ client.on("interactionCreate", async (interaction) => {
       }
     });
   })();
-});
-
-client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-  client.user.setPresence({
-    activities: [{ name: `you. GET OFF INVIS`, type: ActivityType.Watching }],
-    status: "online",
-  });
 });
 
 // Add role if reaction is added.
