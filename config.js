@@ -1,4 +1,4 @@
-const { GatewayIntentBits, Partials } = require("discord.js");
+const { GatewayIntentBits, Partials, ActivityType } = require("discord.js");
 
 module.exports = {
   // clientID: "1040504952793071616",
@@ -20,5 +20,7 @@ module.exports = {
       GatewayIntentBits.GuildPresences,
     ],
     partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+    activities: [{ name: `you. GET OFF INVIS`, type: ActivityType.Watching }],
+    status: "online",
   },
 };
