@@ -317,7 +317,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 client.on("messageCreate", (msg) => {
   //console.log(msg);
   if (message.author.bot) return;
-  
+
   const chatmsg = msg.content;
   const senderID = msg.author.id;
   const senderName = "<@" + senderID + ">";
@@ -415,18 +415,18 @@ client.on("messageCreate", (msg) => {
       console.log("cmd detected");
       // Determine if this chat is allowed to use the bot.
       var sql = "SELECT * FROM discord WHERE discord_id = ?";
-      mySqlObj.query(sql, [senderID], function (err, rows, fields) {
+      mySqlObj.query(sql, [senderID], function (err, results, fields) {
         if (err) throw err;
-        var preventError = rows.length;
+        var preventError = results.length;
         var errorCheck = preventError.toString();
         if (errorCheck > "0") {
           // Grab information about sender from the database.
-          const myTeleID = rows[0].discord_id;
-          const myBanned = rows[0].banned;
-          const aiEnabled = rows[0].ai_enabled;
-          const aaDmin = rows[0].ai_admin;
-          const myLastI = rows[0].last_search;
-          const invis_crackdown = rows[0].invis_crackdown;
+          const myTeleID = results[0].discord_id;
+          const myBanned = results[0].banned;
+          const aiEnabled = results[0].ai_enabled;
+          const aaDmin = results[0].ai_admin;
+          const myLastI = results[0].last_search;
+          const invis_crackdown = results[0].invis_crackdown;
           // Check whether or not the sender is banned from using JustaBot.
           if (myBanned === "yes") {
             msg.react("❌");
