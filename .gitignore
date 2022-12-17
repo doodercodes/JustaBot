@@ -1,6 +1,9 @@
 # Personal
 .test.js
-
+slash
+handlers
+queries.SQL
+.vscode/settings.json
 # Logs
 logs
 *.log
