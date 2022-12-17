@@ -7,7 +7,7 @@ const { REST } = require("@discordjs/rest");
 
 require("colors");
 const ud = require("urban-dictionary");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const request = require("request");
 const fs = require("fs");
 const http = require("http");
@@ -35,7 +35,7 @@ function mysqlConnect() {
   return mysql.createConnection(config.MYSQL);
 }
 
-const objMysq = mysqlConnect();
+const mySqlObj = mysqlConnect();
 
 // Functions needed for commands.
 // Removes first word.
@@ -83,6 +83,7 @@ client.on("interactionCreate", async (interaction) => {
 
   const { commandName } = interaction;
   var senderID = interaction.user.id;
+
   (async () => {
     //await needs async
     const member = await interaction.guild.members.fetch(senderID); //remember you still need async
@@ -93,17 +94,17 @@ client.on("interactionCreate", async (interaction) => {
 
     // Determine if this chat is allowed to use the bot.
     var sql = "SELECT * FROM discord WHERE discord_id = ?";
-    objMysq.query(sql, [senderID], function (err, rows, fields) {
+    mySqlObj.query(sql, [senderID], function (err, results, fields) {
       if (err) throw err;
-      var preventError = rows.length;
+      var preventError = results.length;
       var errorCheck = preventError.toString();
       if (errorCheck > "0") {
         // Grab information about sender from the database.
-        const myTeleID = rows[0].discord_id;
-        const myBanned = rows[0].banned;
-        const aiEnabled = rows[0].ai_enabled;
-        const aaDmin = rows[0].ai_admin;
-        const myLastI = rows[0].last_search;
+        const myTeleID = results[0].discord_id;
+        const myBanned = results[0].banned;
+        const aiEnabled = results[0].ai_enabled;
+        const aaDmin = results[0].ai_admin;
+        const myLastI = results[0].last_search;
 
         // Check whether or not the sender is banned from using JustaBot.
         if (commandName === "i") {
@@ -118,7 +119,7 @@ client.on("interactionCreate", async (interaction) => {
               "' WHERE discord_id='" +
               senderID +
               "'";
-            objMysq.query(query, (err, rows) => {});
+            mySqlObj.query(query, (err, rows) => {});
             var r = request.get(
               "seledity inc secret url delete this if u cant figure out how to make your own web server with google custom search api" +
                 searchQuery,
@@ -136,7 +137,7 @@ client.on("interactionCreate", async (interaction) => {
             var searchQuery = interaction.options.getString("search");
             //await interaction.reply('use -i for now <:pepeGrin:1001962955820245152>');
             var sql = "SELECT * FROM discord WHERE discord_id = ?";
-            objMysq.query(sql, [senderID], function (err, rows, fields) {
+            mySqlObj.query(sql, [senderID], function (err, rows, fields) {
               if (err) throw err;
               var preventError = rows.length;
               var errorCheck = preventError.toString();
@@ -315,15 +316,21 @@ client.on("messageReactionRemove", async (reaction, user) => {
 
 client.on("messageCreate", (msg) => {
   //console.log(msg);
+  if (message.author.bot) return;
+  
   const chatmsg = msg.content;
-  var senderID = msg.author.id;
+  const senderID = msg.author.id;
+  const senderName = "<@" + senderID + ">";
+  const senderUsername = msg.author.username;
+
   (async () => {
     //await needs async
     const member = await msg.guild.members.fetch(senderID); //remember you still need async
-    var membersStatus = member.presence?.status;
+    let membersStatus = member.presence?.status;
     if (membersStatus === null || membersStatus === undefined) {
-      var membersStatus = "offline";
+      membersStatus = "offline";
     }
+
     //console.log(membersStatus);
     //if(membersStatus === 'offline') {
     //  console.log(membersStatus);
@@ -334,11 +341,10 @@ client.on("messageCreate", (msg) => {
     //  .then()
     //   .catch();
     //   }
-
     //console.log(membersStatus);
-    const senderName = "<@" + senderID + ">";
-    const senderUsername = msg.author.username;
+
     const senderQuery = rmF(chatmsg);
+
     // tiktok 'command' (detects a tiktok url and uploads the video from it)
     if (
       chatmsg.startsWith("https://vm.tiktok.com/") === true ||
@@ -367,6 +373,7 @@ client.on("messageCreate", (msg) => {
         }
       );
     }
+
     // ifunny 'command' (detects a ifunny url and uploads the video from it)
     //  if(chatmsg.startsWith('https://ifunny.co/video/') === true) {
     //    msg.delete();
@@ -401,13 +408,14 @@ client.on("messageCreate", (msg) => {
     //    })()
     //  });
     ///  }
+
     // if a command was detected, by a message starting with "-", this is called
     const commandCheck = chatmsg.startsWith("-");
     if (commandCheck === true) {
-      console.log("cmd");
+      console.log("cmd detected");
       // Determine if this chat is allowed to use the bot.
       var sql = "SELECT * FROM discord WHERE discord_id = ?";
-      objMysq.query(sql, [senderID], function (err, rows, fields) {
+      mySqlObj.query(sql, [senderID], function (err, rows, fields) {
         if (err) throw err;
         var preventError = rows.length;
         var errorCheck = preventError.toString();
@@ -450,6 +458,7 @@ client.on("messageCreate", (msg) => {
                 }
               }
             }
+
             // joey cmd
             if (chatmsg.startsWith("-joey") === true) {
               msg.channel.send({
@@ -457,6 +466,7 @@ client.on("messageCreate", (msg) => {
                 files: ["./joey.mp4"],
               });
             }
+
             // Listen for command: -ud (searches Urban Dictionary)
             if (chatmsg.startsWith("-ud") === true) {
               // If sender forgot to include a search query, let them know.
@@ -501,6 +511,7 @@ client.on("messageCreate", (msg) => {
                 msg.react("🤨");
               }
             }
+
             // Listen for command: -i, -R34, -gif, -r (searches Google Images through Google Custom Search API)
             if (
               chatmsg.startsWith("-i") === true ||
@@ -530,7 +541,7 @@ client.on("messageCreate", (msg) => {
                   "' WHERE discord_id='" +
                   senderID +
                   "'";
-                objMysq.query(query, (err, rows) => {});
+                mySqlObj.query(query, (err, rows) => {});
                 var r = request.get(
                   "seledity inc secret url delete this if u cant figure out how to make your own web server with google custom search api" +
                     searchQuery,
@@ -600,6 +611,7 @@ client.on("messageCreate", (msg) => {
                 );
               }
             }
+
             // ai
             if (chatmsg.startsWith("-ai") === true) {
               if (aiEnabled === "no") {
@@ -643,7 +655,7 @@ client.on("messageCreate", (msg) => {
             username: senderUsername,
             last_search: "undefined",
           };
-          objMysq.query(
+          mySqlObj.query(
             "INSERT INTO discord SET ?",
             insdata,
             function (err, result) {}
